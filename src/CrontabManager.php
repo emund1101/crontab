@@ -38,20 +38,26 @@ class CrontabManager
         return true;
     }
 
-    public function parse(): array
+    public function parse($first=false): array
     {
         $result = [];
         $crontabs = $this->getCrontabs();
-        $last = time();
+//          $last = time();
+//替换成当前
+         $now  =time();
+         $last=$first ? time() - date('s') :$now;
+         
+// echo date('Y-m-d H:i:s',$last).PHP_EOL;
         foreach ($crontabs ?? [] as $key => $crontab) {
             if (! $crontab instanceof Crontab) {
                 unset($this->crontabs[$key]);
                 continue;
             }
-            $time = $this->parser->parse($crontab->getRule(), $last);
+            $time = $this->parser->parse($crontab->getRule(), $last,$first);
             if ($time) {
                 foreach ($time as $t) {
-                    $result[] = clone $crontab->setExecuteTime($t);
+                    if(($first&&$t->unix() >=$now) ||!$first)
+                        $result[] = clone $crontab->setExecuteTime($t);
                 }
             }
         }

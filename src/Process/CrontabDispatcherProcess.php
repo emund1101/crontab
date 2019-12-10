@@ -73,17 +73,25 @@ class CrontabDispatcherProcess extends AbstractProcess
         return $this->config->get('crontab.enable', false);
     }
 
+    //修改后,自动根据当前分钟的间隔数，计算最近的执行时间，自动定时运行
     public function handle(): void
     {
-        $this->event->dispatch(new CrontabDispatcherStarted());
+        $i=0;
         while (true) {
-            $this->sleep();
-            $crontabs = $this->scheduler->schedule();
+            $first= $i ? false : true;
+            $i=1;
+            if(!$first)
+                $this->sleep();
+            
+            $crontabs = $this->scheduler->schedule($first);
+          
             while (! $crontabs->isEmpty()) {
                 $crontab = $crontabs->dequeue();
                 $this->strategy->dispatch($crontab);
             }
+            
         }
+
     }
 
     private function sleep()
@@ -92,5 +100,6 @@ class CrontabDispatcherProcess extends AbstractProcess
         $sleep = 60 - $current;
         $this->logger->debug('Crontab dispatcher sleep ' . $sleep . 's.');
         $sleep > 0 && \Swoole\Coroutine::sleep($sleep);
+        
     }
 }

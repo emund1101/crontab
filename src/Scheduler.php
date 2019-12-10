@@ -30,16 +30,16 @@ class Scheduler
         $this->crontabManager = $crontabManager;
     }
 
-    public function schedule(): \SplQueue
+    public function schedule($first=false): \SplQueue
     {
-        foreach ($this->getSchedules() ?? [] as $schedule) {
+        foreach ($this->getSchedules($first) ?? [] as $schedule) {
             $this->schedules->enqueue($schedule);
         }
         return $this->schedules;
     }
 
-    protected function getSchedules(): array
+    public function getSchedules($first): array
     {
-        return $this->crontabManager->parse();
+        return $this->crontabManager->parse($first);
     }
 }

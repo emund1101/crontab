@@ -34,12 +34,12 @@ class Parser
      * @throws \InvalidArgumentException
      * @return Carbon[]
      */
-    public function parse(string $crontabString, $startTime = null)
+    public function parse(string $crontabString, $startTime = null,$first=false)
     {
         if (! $this->isValid($crontabString)) {
             throw new \InvalidArgumentException('Invalid cron string: ' . $crontabString);
         }
-        $startTime = $this->parseStartTime($startTime);
+//         $startTime = $this->parseStartTime($startTime);
         $date = $this->parseDate($crontabString);
         if (in_array((int) date('i', $startTime), $date['minutes'])
             && in_array((int) date('G', $startTime), $date['hours'])
@@ -49,7 +49,7 @@ class Parser
         ) {
             $result = [];
             foreach ($date['second'] as $second) {
-                $result[] = Carbon::createFromTimestamp($startTime + $second);
+                    $result[] = Carbon::createFromTimestamp($startTime + $second);
             }
             return $result;
         }
